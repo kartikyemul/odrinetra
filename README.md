@@ -28,7 +28,11 @@ camera frame -> letterbox 640x640 -> YOLOv8n (onnxruntime-web, WASM) -> decode +
 | Build | Vite, React, TypeScript, onnxruntime-web, Leaflet |
 | Test | Vitest unit tests for IoU, NMS and output decoding |
 | CI/CD | GitHub Actions runs tests and build, Vercel deploys on push |
-| Operate | Service worker caches the app and model after the first load |
+| Operate | Service worker caches the app, the ONNX engine and the model after the first load. Map tiles still need internet |
+
+## Timeline
+
+See [docs/TIMELINE.md](docs/TIMELINE.md).
 
 ## Run it
 
@@ -37,6 +41,8 @@ npm install
 npm test
 npm run dev
 ```
+
+Use **Try a photo** to test on a laptop with no camera.
 
 The app needs a trained model at `public/models/hazard.onnx`. No weights are committed.
 
