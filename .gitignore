@@ -5,3 +5,4 @@ datasets
 *.pt
 __pycache__
 .vercel
+.venv
