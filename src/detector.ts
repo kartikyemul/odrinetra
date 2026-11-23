@@ -2,7 +2,7 @@ import * as ort from 'onnxruntime-web';
 import { Box, decode, nms } from './postprocess';
 import { LABELS } from './labels';
 
-ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/';
+ort.env.wasm.numThreads = 1;
 
 const SIZE = 640;
 let session: ort.InferenceSession | null = null;
@@ -14,16 +14,23 @@ export async function loadModel(url = '/models/hazard.onnx') {
   session = await ort.InferenceSession.create(url, { executionProviders: ['wasm'] });
 }
 
+type Source = HTMLVideoElement | HTMLImageElement;
+
+function sizeOf(s: Source) {
+  return s instanceof HTMLVideoElement ? [s.videoWidth, s.videoHeight] : [s.naturalWidth, s.naturalHeight];
+}
+
 // boxes come back in the video's own pixel space
-export async function detect(video: HTMLVideoElement, minScore = 0.4): Promise<Box[]> {
+export async function detect(source: Source, minScore = 0.4): Promise<Box[]> {
   if (!session) return [];
-  const scale = Math.min(SIZE / video.videoWidth, SIZE / video.videoHeight);
-  const dw = video.videoWidth * scale, dh = video.videoHeight * scale;
+  const [vw, vh] = sizeOf(source);
+  const scale = Math.min(SIZE / vw, SIZE / vh);
+  const dw = vw * scale, dh = vh * scale;
   const px = (SIZE - dw) / 2, py = (SIZE - dh) / 2;
 
   ctx.fillStyle = '#727272';
   ctx.fillRect(0, 0, SIZE, SIZE);
-  ctx.drawImage(video, px, py, dw, dh);
+  ctx.drawImage(source, px, py, dw, dh);
   const { data } = ctx.getImageData(0, 0, SIZE, SIZE);
 
   const plane = SIZE * SIZE;
