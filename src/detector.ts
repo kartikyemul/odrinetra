@@ -43,6 +43,10 @@ export async function detect(source: Source, minScore = 0.4): Promise<Box[]> {
 
   const out = await session.run({ [session.inputNames[0]]: new ort.Tensor('float32', input, [1, 3, SIZE, SIZE]) });
   const raw = out[session.outputNames[0]].data as Float32Array;
+  const classes = raw.length / 8400 - 4;
+  if (classes !== LABELS.length) {
+    throw new Error(`The model has ${classes} classes but src/labels.ts lists ${LABELS.length}.`);
+  }
   return nms(decode(raw, LABELS.length, minScore)).map(b => ({
     ...b, x: (b.x - px) / scale, y: (b.y - py) / scale, w: b.w / scale, h: b.h / scale,
   }));

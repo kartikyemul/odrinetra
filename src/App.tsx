@@ -71,9 +71,14 @@ export default function App() {
 
   async function loop() {
     const v = video.current!;
-    while (running.current) {
-      drawBoxes(await detect(v, minScore.current), v.videoWidth, v.videoHeight, true);
-      await new Promise(requestAnimationFrame);
+    try {
+      while (running.current) {
+        drawBoxes(await detect(v, minScore.current), v.videoWidth, v.videoHeight, true);
+        await new Promise(requestAnimationFrame);
+      }
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : 'Detection failed.');
+      stop();
     }
     overlay.current!.getContext('2d')!.clearRect(0, 0, 9999, 9999);
   }
@@ -94,9 +99,13 @@ export default function App() {
 
   async function checkPhoto() {
     const i = img.current!;
-    const found = await detect(i, minScore.current);
-    drawBoxes(found, i.naturalWidth, i.naturalHeight, false);
-    setStatus(found.length ? `${found.length} found in this photo` : 'Nothing found in this photo');
+    try {
+      const found = await detect(i, minScore.current);
+      drawBoxes(found, i.naturalWidth, i.naturalHeight, false);
+      setStatus(found.length ? `${found.length} found in this photo` : 'Nothing found in this photo');
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : 'Detection failed.');
+    }
   }
 
   function changeConf(value: number) {
