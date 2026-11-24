@@ -6,3 +6,5 @@ datasets
 __pycache__
 .vercel
 .venv
+.env
+.env.*
